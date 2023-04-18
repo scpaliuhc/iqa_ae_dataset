@@ -13,10 +13,13 @@ Target model:
 3. ...
 
 Methods:
-1. Type 1:
-2. Type 2:
-3. Type 3:
-4. Type 4:
+1. Gradient-based: FGSM (0), MIM (1), PGD (2), NES (3)
+2. Optimization-based: CW (4), AutoZOO (5), 
+3. Discrete-noise-based: SimBA (6), SparseFool (7)(好像效率很低), Shouling (8),
+4. NN-generation-based: AdvGAN (9), ATN (10)
+5. Patch-based: Square (11), 
+6. Universal-based: UAP (), GAP, FFF, GUAP
+7. Spatially-transformed-based: xxx
 
 *Fake label* $f(x) \neq f(x')$ or *real label* $f(x') \neq GT$?
 
