@@ -1,0 +1,43 @@
+ME_ID: 0
+
+TM_ID: 1
+
+PA_ID: 1
+
+CUDA_ID: 0
+
+Methods:
+  ['FGSM','MIFGSM','PGD','NES','CW','AutoZOOM','SimBA','SparseFoo','SBLS','AdvGAN','ATN','Square','UAP','GAP','FFF','GUAP']
+
+Parameters:
+  {'FGSM':[[0.003],[0.03],[0.3]],
+   'MIFGSM':[[0.003,0.0003,10,0.9],
+          [0.03,0.003,10,0.9]],
+   'PGD':[[0.003,0.0003,10],
+          [0.03,0.003,10]],
+   'NES':[],
+   'CW':[],
+   'AutoZOOM':[],
+   'SimBA':[],
+   'SparseFool':[],
+   'SBLS':[],
+   'AdvGAN':[],
+   'ATN':[],
+   'Square':[],
+   'UAP':[],
+   'GAP':[],
+   'FFF':[],
+   'GUAP':[]
+   }
+
+Target_Models:
+  ['inception-v3','resnet18','desnet','efficientnet']
+
+Image_Size:
+  [512,512]
+
+Image_Dir:
+  './REF-V1'
+
+Save_Dir:
+  ''
