@@ -1,27 +1,41 @@
-ME_ID: 0
+ME_ID: '0'
 
-TM_ID: 1
+TM_ID: 0
 
-PA_ID: 1
+PA_ID: 0
 
 CUDA_ID: 0
 
 Methods:
-  ['FGSM','MIFGSM','PGD','NES','CW','AutoZOOM','SimBA','SparseFoo','SBLS','AdvGAN','ATN','Square','UAP','GAP','FFF','GUAP']
+  {'0':'FGSM',
+   '1':'BIM',
+   '2':'MIFGSM',
+   '3':'PGD',
+   '4':'NES',
+   '5':'CW',
+   '6':'SimBA',
+   '7':'SparseFool',
+   '8':'CDP',
+   '9':'AdvGAN',
+   '10':'AdvPatch',
+   '11':'Square',
+   '12':'UAP',
+   '13':'GAP',
+   '14':'FFF',
+   '15':'GUAP'}
 
 Parameters:
-  {'FGSM':[[0.003],[0.03],[0.3]],
-   'MIFGSM':[[0.003,0.0003,10,0.9],
+  {'FGSM':[[0.003],[0.03],[0.3]], #eps
+   'MIFGSM':[[0.003,0.0003,10,0.9], #eps, alpha, steps, decay
           [0.03,0.003,10,0.9]],
-   'PGD':[[0.003,0.0003,10],
+   'PGD':[[0.003,0.0003,10], #eps, alpha, steps
           [0.03,0.003,10]],
-   'NES':[],
-   'CW':[],
-   'AutoZOOM':[],
-   'SimBA':[],
-   'SparseFool':[],
-   'SBLS':[],
-   'AdvGAN':[],
+   'NES':[[0.3,0.003,30]], #eps, aplha, steps
+   'CW':[[1,100]], #c, steps
+   'SimBA':[[0.5,1000]], #eps, steps 
+   'SparseFool':[[10,3]], #steps, lam
+   'CDP':[[0.009,'checkpoints/cdp_incv3.pth']],
+   'AdvGAN':[[0.5,'checkpoints/G_epoch_61.pth']], #eps, checkpoint
    'ATN':[],
    'Square':[],
    'UAP':[],
@@ -31,13 +45,15 @@ Parameters:
    }
 
 Target_Models:
-  ['inception-v3','resnet18','desnet','efficientnet']
+  ['inception_v3','resnet18','desnet','efficientnet']
 
 Image_Size:
-  [512,512]
+  [299,299]
 
 Image_Dir:
   './REF-V1'
 
 Save_Dir:
   ''
+
+Test_Amount: 10

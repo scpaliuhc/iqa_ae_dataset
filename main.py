@@ -15,11 +15,12 @@ import imageio
 from skimage import img_as_ubyte
 MEAN=[[[0.485, 0.456, 0.406]]]
 STD=[[[0.229, 0.224, 0.225]]]
-COUNT=10 # for test
+
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg : DictConfig):
     # device
+    global device
     if torch.cuda.is_available():
         device = torch.device("cuda")
     else:
@@ -77,6 +78,11 @@ def load_attack(cfg,model):
     if cfg.Methods[cfg.ME_ID] == 'FGSM':
         atk_=atk(model,
                  eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0])
+    elif cfg.Methods[cfg.ME_ID] == 'BIM':
+        atk_=atk(model,
+                 eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
+                 alpha=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1],
+                 steps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][2])
     elif cfg.Methods[cfg.ME_ID] == 'PGD':
         atk_=atk(model,
                  eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
@@ -90,35 +96,48 @@ def load_attack(cfg,model):
                  steps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][2],
                  decay=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][3])
     elif cfg.Methods[cfg.ME_ID] == 'NES':
-        None
+        from src.NES import NES
+        atk_=NES(model,
+                eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
+                alpha=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1],
+                steps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][2],
+                device=device)
     elif cfg.Methods[cfg.ME_ID] == 'CW':
-        atk(model,
+        atk_=atk(model,
                  c=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
                  steps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1])
-    elif cfg.Methods[cfg.ME_ID] == 'AutoZOOM':
-        None
     elif cfg.Methods[cfg.ME_ID] == 'SimBA':
-        None
-    elif cfg.Methods[cfg.Me_ID] == "SparseFool":
-        atk(model,
+        from src.SimBA import SimBA
+        atk_=SimBA(model,
+                   eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
+                   steps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1],
+                   device=device)
+    elif cfg.Methods[cfg.ME_ID] == "SparseFool":
+        atk_=atk(model,
                  c=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
                  steps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1])
-    elif cfg.Methods[cfg.Me_ID] == "SBLS":
-        None
-    elif cfg.Methods[cfg.Me_ID] == "AdvGAN":
-        None
-    elif cfg.Methods[cfg.Me_ID] == "ATN":
-        None
-    elif cfg.Methods[cfg.Me_ID] == "Square":
-        atk(model)
-    elif cfg.Methods[cfg.Me_ID] == "UAP":
-        None
-    elif cfg.Methods[cfg.Me_ID] == "GAP":
-        None
-    elif cfg.Methods[cfg.Me_ID] == "FFF":
-        None
-    elif cfg.Methods[cfg.Me_ID] == "GUAP":
-        None
+    elif cfg.Methods[cfg.ME_ID] == "CDP":
+        from src.CDP import CDP
+        atk_=CDP(device=device,
+                    eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
+                    checkpoint=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1])
+    elif cfg.Methods[cfg.ME_ID] == "AdvGAN":
+        from src.advGAN import advGAN
+        atk_=advGAN(device,
+                    eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
+                    checkpoint=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1])
+    elif cfg.Methods[cfg.ME_ID] == "AdvPatch":
+        raise NotImplementedError
+    elif cfg.Methods[cfg.ME_ID] == "Square":
+        raise NotImplementedError
+    elif cfg.Methods[cfg.ME_ID] == "UAP":
+        raise NotImplementedError
+    elif cfg.Methods[cfg.ME_ID] == "GAP":
+        raise NotImplementedError
+    elif cfg.Methods[cfg.ME_ID] == "FFF":
+        raise NotImplementedError
+    elif cfg.Methods[cfg.ME_ID] == "GUAP":
+        raise NotImplementedError
     return atk_
 
 def carry_attack(atk_,dataset,device,save_dir,cfg,model):
@@ -126,7 +145,7 @@ def carry_attack(atk_,dataset,device,save_dir,cfg,model):
     dataset=tqdm(dataset,ncols=100,desc=desc)
     id=0
     for img,file in dataset:
-        if id>COUNT:
+        if id>cfg.Test_Amount:
             break
         id+=1
         img = img.to(device)
