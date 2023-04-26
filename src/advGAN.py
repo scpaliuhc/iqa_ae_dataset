@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch
+import torchvision.transforms as transforms
 class Generator(nn.Module):
     def __init__(self, gen_input_nc, image_nc, target='Auto'):
         super(Generator, self).__init__()
@@ -57,9 +58,9 @@ class Generator(nn.Module):
         self.encoder = nn.Sequential(*encoder_lis)
         self.bottle_neck = nn.Sequential(*bottle_neck_lis)
         self.decoder = nn.Sequential(*decoder_lis)
-        self.norm_layer=Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        # self.norm_layer=Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     def forward(self, x):
-        x = self.norm_layer(x)
+        # x = self.norm_layer(x)
         x = self.encoder(x)
         x = self.bottle_neck(x)
         x = self.decoder(x)
@@ -68,8 +69,8 @@ class Generator(nn.Module):
 class Normalize(nn.Module) :
     def __init__(self, mean, std) :
         super(Normalize, self).__init__()
-        self.register_buffer('mean', torch.Tensor(mean))
-        self.register_buffer('std', torch.Tensor(std))
+        self.register_buffer('mean', torch.Tensor(mean).to('cuda'))
+        self.register_buffer('std', torch.Tensor(std).to('cuda'))
     def forward(self, input):
         # Broadcasting
         mean = self.mean.reshape(1, 3, 1, 1)
@@ -118,16 +119,32 @@ class ResnetBlock(nn.Module):
         out = x + self.conv_block(x)
         return out
 
+class NormalizeInverse(object):
+    def __init__(self, mean, std):
+        self.mean = mean
+        self.std = std
 
+    def __call__(self, tensor):
+        invert_norm = transforms.Normalize(
+            mean=[-m_elem/s_elem for m_elem, s_elem in zip(self.mean, self.std)], 
+            std=[1/elem for elem in self.std]
+        )
+        return invert_norm(tensor)
+    
 class advGAN(object):
     def __init__(self,device,eps,checkpoint) -> None:
         self.generator=Generator(3,3,'HighResolution').to(device)
         self.generator.load_state_dict(torch.load(checkpoint))
         self.generator.eval()
+        self.norm_layer=Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         self.eps=eps
+        self.inv_norm=NormalizeInverse(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     def __call__(self, img, label):
+        img=self.norm_layer(img)
         perturbation = self.generator(img)
-        print(torch.max(perturbation),torch.min(perturbation))
         adv_img = torch.clamp(perturbation, -self.eps, self.eps) + img
         adv_img = torch.clamp(adv_img, 0, 1)
+
+        # adv_img = torch.clamp(perturbation, -self.eps, self.eps) + img
+        # adv_img = torch.clamp(adv_img, 0, 1)
         return adv_img.detach()

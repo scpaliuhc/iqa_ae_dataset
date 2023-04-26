@@ -13,41 +13,24 @@ from logzero import logger as log
 import imageio
 # import cv2
 from skimage import img_as_ubyte
-MEAN=[[[0.485, 0.456, 0.406]]]
-STD=[[[0.229, 0.224, 0.225]]]
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+global device
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+else:
+    device = torch.device("cpu")
+MEAN=torch.tensor([0.485, 0.456, 0.406]).view((1,3,1,1)).to(device)
+STD=torch.tensor([0.229, 0.224, 0.225]).view((1,3,1,1)).to(device)
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg : DictConfig):
-    # device
-    global device
-    if torch.cuda.is_available():
-        device = torch.device("cuda")
-    else:
-        device = torch.device("cpu")
-    
     # dataset
     DL=load_dataset(cfg)
     
     # model
-    TM=load_model(cfg)
-    class Normalize(nn.Module) :
-        def __init__(self, mean, std) :
-            super(Normalize, self).__init__()
-            self.register_buffer('mean', torch.Tensor(mean))
-            self.register_buffer('std', torch.Tensor(std))
-        def forward(self, input):
-            # Broadcasting
-            mean = self.mean.reshape(1, 3, 1, 1)
-            std = self.std.reshape(1, 3, 1, 1)
-            return (input - mean) / std
-    norm_layer = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    TM = nn.Sequential(
-        norm_layer,
-        TM
-    )
-    TM=TM.to(device).eval()
-
+    TM=load_model(cfg,device)
+    
     # make dir ae/method/parameter
     save_dir=os.path.join('./AE',str(cfg.ME_ID),str(cfg.PA_ID))
 
@@ -68,8 +51,25 @@ def load_dataset(cfg):
     dataloader=DataLoader(dataset,1,shuffle=False,drop_last=False,num_workers=2)
     return dataloader
 
-def load_model(cfg):
-    return getattr(models,cfg.Target_Models[cfg.TM_ID])(pretrained=True)
+def load_model(cfg,device):
+    TM = getattr(models,cfg.Target_Models[cfg.TM_ID])(pretrained=True)
+    class Normalize(nn.Module) :
+        def __init__(self, mean, std) :
+            super(Normalize, self).__init__()
+            self.register_buffer('mean', torch.Tensor(mean).to(device))
+            self.register_buffer('std', torch.Tensor(std).to(device))
+        def forward(self, input):
+            # Broadcasting
+            mean = self.mean.reshape(1, 3, 1, 1)
+            std = self.std.reshape(1, 3, 1, 1)
+            return (input - mean) / std
+    norm_layer = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    TM = nn.Sequential(
+        norm_layer,
+        TM
+    )
+    TM=TM.to(device).eval()
+    return TM
 
 def load_attack(cfg,model):
     if cfg.Methods[cfg.ME_ID] in torchattacks.__all__:
@@ -111,10 +111,11 @@ def load_attack(cfg,model):
         atk_=SimBA(model,
                    eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
                    steps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1],
+                   early_stop=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][2],
                    device=device)
     elif cfg.Methods[cfg.ME_ID] == "SparseFool":
         atk_=atk(model,
-                 c=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
+                 lam=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
                  steps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1])
     elif cfg.Methods[cfg.ME_ID] == "CDP":
         from src.CDP import CDP
@@ -127,31 +128,56 @@ def load_attack(cfg,model):
                     eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
                     checkpoint=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1])
     elif cfg.Methods[cfg.ME_ID] == "AdvPatch":
-        raise NotImplementedError
+        from src.AdvPatch import AdvPatch_v2
+        with open(cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],'rb') as f:
+            import pickle
+            patch=pickle.load(f)
+        atk_=AdvPatch_v2(model,
+                         device=device,
+                         patch_type='rectangle',
+                         target=int(cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0].split('_')[-1]),
+                         patch=patch,
+                         mean=MEAN,
+                         std=STD,
+                         )
     elif cfg.Methods[cfg.ME_ID] == "Square":
-        raise NotImplementedError
+        atk_=atk(model, 
+                 norm=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
+                 eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1],
+                 p_init=0.8,#cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][2],
+                 n_queries=1000)
     elif cfg.Methods[cfg.ME_ID] == "UAP":
         raise NotImplementedError
     elif cfg.Methods[cfg.ME_ID] == "GAP":
-        raise NotImplementedError
+        from src.GAP import GAP
+        atk_=GAP(model,
+                 device=device,
+                 mean=MEAN,
+                 std=STD,
+                 mode=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
+                 checkpoint=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1],
+                 )
     elif cfg.Methods[cfg.ME_ID] == "FFF":
         raise NotImplementedError
     elif cfg.Methods[cfg.ME_ID] == "GUAP":
         raise NotImplementedError
+    elif cfg.Methods[cfg.ME_ID] == "DeepFool":
+        atk_=atk(model,steps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],overshoot=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1])
     return atk_
 
 def carry_attack(atk_,dataset,device,save_dir,cfg,model):
     desc=f"{cfg.Methods[cfg.ME_ID]} {cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID]}"
-    dataset=tqdm(dataset,ncols=100,desc=desc)
+    dataset=tqdm(dataset,ncols=80,desc=desc)
     id=0
+    count=0
     for img,file in dataset:
-        if id>cfg.Test_Amount:
+        if id>=cfg.Test_Amount:
             break
         id+=1
         img = img.to(device)
         _, pic_name = file,os.path.split(file[0])
         pic_name = pic_name[1].split('.')[0]
-        
+
         pred_before = model(img)
         fake_label = torch.argmax(pred_before,keepdim=True)
         fake_label = fake_label.view([-1])
@@ -163,13 +189,16 @@ def carry_attack(atk_,dataset,device,save_dir,cfg,model):
 
         if fake_label[0] != pred_label[0]:
             success='T'
+            count+=1
         else:
             success='F'
        
-        full_name = f"{pic_name}_{str(cfg.TM_ID).zfill(2)}_{str(cfg.ME_ID).zfill(2)}_{str(cfg.PA_ID).zfill(2)}_{success}_{fake_label[0]}_{pred_label[0]}.png"
+        full_name = f"{pic_name}_{str(cfg.TM_ID).zfill(2)}_{str(cfg.ME_ID).zfill(2)}_{str(cfg.PA_ID).zfill(2)}_{success}.png"
+        # _{fake_label[0]}_{pred_label[0]}.png"
         
         img_adv=img_adv[0].cpu().numpy().transpose(1,2,0)
         imageio.imsave(os.path.join(save_dir,full_name),img_as_ubyte(img_adv))
-        
+    log.debug(f'attack success rate {count/id:.4f}')
+
 if __name__=='__main__':
     main()

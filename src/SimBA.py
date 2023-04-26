@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class SimBA:
     
-    def __init__(self,model,device,steps=10000, eps=0.2, targeted=False):
+    def __init__(self,model,device,steps=10000, eps=0.2, early_stop=True, targeted=False):
         self.model = model
         # self.dataset = dataset
         # self.model.eval()
@@ -13,6 +13,7 @@ class SimBA:
         self.num_iters=steps
         self.epsilon=eps
         self.targeted=targeted
+        self.early_stop=early_stop
 
         
     # def normalize(self, x):
@@ -47,7 +48,8 @@ class SimBA:
                 if self.targeted != (right_prob < last_prob):
                     x = (x + diff.view(x.size())).clamp(0, 1)
                     last_prob = right_prob
-            if not self.targeted and i>0 and i%20==0:
+            
+            if not self.targeted and self.early_stop and i>0 and i%20==0:
                 pred=self.model(x)
                 pred=torch.argmax(pred,keepdim=True).view([-1])
                 if pred[0]!=y:
