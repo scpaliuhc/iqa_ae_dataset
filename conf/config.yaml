@@ -57,15 +57,16 @@ Parameters:
           [0.5,0.05,30]], 
    'CW':[[1,100]], #c, steps
    'SimBA':[[0.2,2000,True],
-            [0.5,1000,True],
+       #      [0.5,1000,True],
             [0.8,1000,True],
-            [0.2,2000,False],
-            [0.5,1000,False],
+       #      [0.2,2000,False],
+       #      [0.5,1000,False],
             [0.8,1000,False],
             ], # eps, steps, early_stop
    'SparseFool':[[10,0.8],
                  [10,0.5]], #steps, lam
-   'CDP':[[0.01,'checkpoints/cdp_incv3.pth'],
+   'CDP':[
+          #[0.01,'checkpoints/cdp_incv3.pth'],
           [0.02,'checkpoints/cdp_incv3.pth']],
    'AdvGAN':[
              [8,'checkpoints/AdvGAN_8.pth'],
@@ -83,18 +84,19 @@ Parameters:
 
    ],
    'UAP':[],
-   'GAP':[['Uni','./checkpoints/GAP_Uni_805.pth'],
+   'GAP':[
+       #    ['Uni','./checkpoints/GAP_Uni_805.pth'],
           ['Uni','./checkpoints/GAP_Uni_-1.pth'],
           ['imdep','./checkpoints/GAP_imdep_-1.pth']],
    'FFF':[],
    'GUAP':[['./checkpoints/GUAP_incv3_flow.npy','./checkpoints/GUAP_incv3_noise.npy','st'],
-           ['./checkpoints/GUAP_incv3_flow.npy','./checkpoints/GUAP_incv3_noise.npy','noise'],
+       #     ['./checkpoints/GUAP_incv3_flow.npy','./checkpoints/GUAP_incv3_noise.npy','noise'],
            ['./checkpoints/GUAP_incv3_flow.npy','./checkpoints/GUAP_incv3_noise.npy','perb']],
-   'DeepFool':[[50,0.02],[50,0.2]],
-   'AdvPatch':[['./checkpoints/AdvPatch_0.02_859'],
-               ['./checkpoints/AdvPatch_0.05_859'],
-               ['./checkpoints/AdvPatch_0.1_859'],
-               ],
+#    'DeepFool':[[50,0.02],[50,0.2]],
+#    'AdvPatch':[['./checkpoints/AdvPatch_0.02_859'],
+#                ['./checkpoints/AdvPatch_0.05_859'],
+#                ['./checkpoints/AdvPatch_0.1_859'],
+#                ],
     'DIFGSM':[[0.01,0.001,10,0.98],
               [0.03,0.003,10,0.98],
               [0.05,0.005,10,0.98],
