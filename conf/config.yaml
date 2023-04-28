@@ -9,21 +9,21 @@ PA_ID: 4
 Methods:
   {'0':'FGSM',
    # '1':'BIM',
-   '2':'MIFGSM',
-   '3':'PGD',
-   '4':'NES',
+   '1':'MIFGSM',
+   '2':'PGD',
+   '3':'NES',
    # '5':'DeepFool',
    # '6':'CW',
-   '7':'SimBA',
+   '4':'SimBA',
    # '8':'SparseFool',
-   '9':'CDP',
-   '10':'AdvGAN',
-   '11':'GAP',
-   '12':'GUAP',
+   '5':'CDP',
+   '6':'AdvGAN',
+   '7':'GAP',
+   '8':'GUAP',
    # '13':'AdvPatch',
-   '14':'Square',
+   '9':'Square',
    # '15':'DIFGSM',
-   '16':'Pixle'
+   '10':'Pixle'
    }
 
 Parameters:

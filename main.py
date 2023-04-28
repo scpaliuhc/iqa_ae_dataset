@@ -98,10 +98,10 @@ def load_attack(cfg,model):
     elif cfg.Methods[cfg.ME_ID] == 'NES':
         from src.NES import NES
         atk_=NES(model,
-                eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
-                alpha=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1],
-                steps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][2],
-                device=device)
+                 eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
+                 alpha=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1],
+                 steps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][2],
+                 device=device)
     elif cfg.Methods[cfg.ME_ID] == 'CW':
         atk_=atk(model,
                  c=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
@@ -120,8 +120,8 @@ def load_attack(cfg,model):
     elif cfg.Methods[cfg.ME_ID] == "CDP":
         from src.CDP import CDP
         atk_=CDP(device=device,
-                    eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
-                    checkpoint=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1])
+                 eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
+                 checkpoint=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1])
     elif cfg.Methods[cfg.ME_ID] == "AdvGAN":
         from src.advGAN import AdvGAN
         atk_=AdvGAN(device=device,
