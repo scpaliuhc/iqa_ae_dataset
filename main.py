@@ -13,7 +13,7 @@ from logzero import logger as log
 import imageio
 # import cv2
 from skimage import img_as_ubyte
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 global device
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -160,9 +160,38 @@ def load_attack(cfg,model):
     elif cfg.Methods[cfg.ME_ID] == "FFF":
         raise NotImplementedError
     elif cfg.Methods[cfg.ME_ID] == "GUAP":
-        raise NotImplementedError
+        from src.GUAP import GUAP
+        import numpy as np
+        flow=np.load(cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0])
+        flow=torch.tensor(flow).to(device)
+        noise=np.load(cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1])
+        noise=torch.tensor(noise).to(device)
+        atk_=GUAP(flow,noise,MEAN,STD,device,cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][2])
     elif cfg.Methods[cfg.ME_ID] == "DeepFool":
         atk_=atk(model,steps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],overshoot=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1])
+    elif cfg.Methods[cfg.ME_ID] == "DIFGSM":
+        atk_=atk(model,
+                 eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
+                 alpha=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1],
+                 steps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][2],
+                 decay=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][3],
+                 )
+    elif cfg.Methods[cfg.ME_ID] == "SPSA":
+        atk_=atk(model,
+                 eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
+                 delta=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1],
+                 nb_iter=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][2],
+                 nb_sample=100,
+                 max_batch_size=5,
+                 )
+    elif cfg.Methods[cfg.ME_ID] == "Pixle":
+        atk_=atk(model,
+                 x_dimensions=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
+                 restarts=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1],
+                 max_iterations=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][2]
+                 )
+    else:
+        raise ValueError
     return atk_
 
 def carry_attack(atk_,dataset,device,save_dir,cfg,model):

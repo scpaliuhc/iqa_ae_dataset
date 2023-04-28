@@ -14,7 +14,7 @@ class GAP(object):
             delta_im=torch.load(checkpoint)
             self.delta_im=self.normalize_and_scale(delta_im,'test')
         elif mode=='imdep':
-            self.netG = ResnetGenerator(3, 3, 64, norm_type='batch', act_type='relu', gpu_ids=['0']).to(device).eval()
+            self.netG = ResnetGenerator(3, 3, 64, norm_type='batch', act_type='relu', gpu_ids=[0]).to(device).eval()
             self.netG.load_state_dict(torch.load(checkpoint))
 
 

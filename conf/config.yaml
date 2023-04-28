@@ -1,8 +1,8 @@
-ME_ID: '13'
+ME_ID: '16'
 
 TM_ID: 0
 
-PA_ID: 1
+PA_ID: 0
 
 # CUDA_ID: 0
 
@@ -12,18 +12,19 @@ Methods:
    '2':'MIFGSM',
    '3':'PGD',
    '4':'NES',
-   '5':'CW',
-   '6':'SimBA',
-   '7':'SparseFool',
-   '8':'CDP',
-   '9':'AdvGAN',
-   '10':'AdvPatch',
-   '11':'Square',
-   '12':'UAP',
-   '13':'GAP',
-   '14':'FFF',
-   '15':'GUAP',
-   '16':'DeepFool'}
+   '5':'DeepFool',
+   '6':'CW',
+   '7':'SimBA',
+   '8':'SparseFool',
+   '9':'CDP',
+   '10':'AdvGAN',
+   '11':'GAP',
+   '12':'GUAP',
+   '13':'AdvPatch',
+   '14':'Square',
+   '15':'DIFGSM',
+   '16':'Pixle'
+   }
 
 Parameters:
   {'FGSM':[[0.005],[0.01],[0.02],[0.04],[0.08]], #eps
@@ -72,17 +73,31 @@ Parameters:
              ['Linf',0.01],
              ['Linf',0.03],
              ['Linf',0.06],
-             ['L2',0.3],
-             ['L2',10]
+             ['L2',5],
+             ['L2',10],
+             ['L2',20]
 
    ],
    'UAP':[],
    'GAP':[['Uni','./checkpoints/GAP_Uni_805.pth'],
-          ['Uni','./checkpoints/GAP_Uni_-1.pth']],
+          ['Uni','./checkpoints/GAP_Uni_-1.pth'],
+          ['imdep','./checkpoints/GAP_imdep_-1.pth']],
    'FFF':[],
-   'GUAP':[],
+   'GUAP':[['./checkpoints/GUAP_incv3_flow.npy','./checkpoints/GUAP_incv3_noise.npy','st'],
+           ['./checkpoints/GUAP_incv3_flow.npy','./checkpoints/GUAP_incv3_noise.npy','noise'],
+           ['./checkpoints/GUAP_incv3_flow.npy','./checkpoints/GUAP_incv3_noise.npy','perb']],
    'DeepFool':[[50,0.02],[50,0.2]],
-   'AdvPatch':[['./checkpoints/AdvPatch_0.05_859'],[['./checkpoints/AdvPatch_0.1_859']]],
+   'AdvPatch':[['./checkpoints/AdvPatch_0.02_859'],
+               ['./checkpoints/AdvPatch_0.05_859'],
+               ['./checkpoints/AdvPatch_0.1_859'],
+               ],
+    'DIFGSM':[[0.01,0.001,10,0.98],
+              [0.03,0.003,10,0.98],
+              [0.05,0.005,10,0.98],
+              [0.08,0.008,10,0.98],
+              [0.1,0.01,10,0.98]],
+     'SPSA':[[0.03,0.01,10]],
+     'Pixle':[[[0.1,0.2],10,50]]
    }
 
 Target_Models:
