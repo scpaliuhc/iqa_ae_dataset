@@ -123,8 +123,8 @@ def load_attack(cfg,model):
                     eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
                     checkpoint=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1])
     elif cfg.Methods[cfg.ME_ID] == "AdvGAN":
-        from src.advGAN import advGAN
-        atk_=advGAN(device,
+        from src.advGAN import AdvGAN
+        atk_=AdvGAN(device=device,
                     eps=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][0],
                     checkpoint=cfg.Parameters[cfg.Methods[cfg.ME_ID]][cfg.PA_ID][1])
     elif cfg.Methods[cfg.ME_ID] == "AdvPatch":

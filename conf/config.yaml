@@ -1,8 +1,8 @@
-ME_ID: '16'
+ME_ID: '10'
 
 TM_ID: 0
 
-PA_ID: 0
+PA_ID: 4
 
 # CUDA_ID: 0
 
@@ -67,8 +67,12 @@ Parameters:
                  [10,0.5]], #steps, lam
    'CDP':[[0.01,'checkpoints/cdp_incv3.pth'],
           [0.02,'checkpoints/cdp_incv3.pth']],
-   'AdvGAN':[[0.5,'checkpoints/G_epoch_60.pth']], #eps, checkpoint
-   'ATN':[],
+   'AdvGAN':[
+             [8,'checkpoints/AdvGAN_8.pth'],
+             [16,'checkpoints/AdvGAN_16.pth'],
+             [4,'checkpoints/AdvGAN_8.pth'],
+             [2,'checkpoints/AdvGAN_8.pth'],
+             [4,'checkpoints/AdvGAN_16.pth'],], #eps, checkpoint
    'Square':[ # norm, eps, p_init
              ['Linf',0.01],
              ['Linf',0.03],
