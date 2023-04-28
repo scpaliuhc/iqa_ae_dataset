@@ -13,7 +13,7 @@ from logzero import logger as log
 import imageio
 # import cv2
 from skimage import img_as_ubyte
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 global device
 if torch.cuda.is_available():
     device = torch.device("cuda")

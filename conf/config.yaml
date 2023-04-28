@@ -1,4 +1,4 @@
-ME_ID: '10'
+ME_ID: '4'
 
 TM_ID: 0
 
@@ -8,21 +8,21 @@ PA_ID: 4
 
 Methods:
   {'0':'FGSM',
-   '1':'BIM',
+   # '1':'BIM',
    '2':'MIFGSM',
    '3':'PGD',
    '4':'NES',
-   '5':'DeepFool',
-   '6':'CW',
+   # '5':'DeepFool',
+   # '6':'CW',
    '7':'SimBA',
-   '8':'SparseFool',
+   # '8':'SparseFool',
    '9':'CDP',
    '10':'AdvGAN',
    '11':'GAP',
    '12':'GUAP',
-   '13':'AdvPatch',
+   # '13':'AdvPatch',
    '14':'Square',
-   '15':'DIFGSM',
+   # '15':'DIFGSM',
    '16':'Pixle'
    }
 
