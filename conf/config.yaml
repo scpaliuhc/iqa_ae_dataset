@@ -69,9 +69,9 @@ Parameters:
           #[0.01,'checkpoints/cdp_incv3.pth'],
           [0.02,'checkpoints/cdp_incv3.pth']],
    'AdvGAN':[
-             [8,'checkpoints/AdvGAN_8.pth'],
+       #       [8,'checkpoints/AdvGAN_8.pth'],
              [16,'checkpoints/AdvGAN_16.pth'],
-             [4,'checkpoints/AdvGAN_8.pth'],
+       #       [4,'checkpoints/AdvGAN_8.pth'],
              [2,'checkpoints/AdvGAN_8.pth'],
              [4,'checkpoints/AdvGAN_16.pth'],], #eps, checkpoint
    'Square':[ # norm, eps, p_init
